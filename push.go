@@ -1,12 +1,5 @@
 package jpush
 
-import (
-	"net/http"
-	"encoding/json"
-	"bytes"
-	"io/ioutil"
-)
-
 type Platform string
 
 const (
@@ -15,7 +8,7 @@ const (
 	PlatformWinPhone Platform = "winphone"
 )
 
-type RequestAudience struct {
+type PushAudience struct {
 	Tag            []string `json:"tag,omitempty"`
 	TagAnd         []string `json:"tag_and,omitempty"`
 	TagNot         []string `json:"tag_not,omitempty"`
@@ -85,38 +78,11 @@ type PushOptions struct {
 }
 
 type PushRequest struct {
-	Cid          string            `json:"cid"`
+	Cid          string            `json:"cid,omitempty"`
 	Platform     Platform          `json:"platform"`
-	Audience     *RequestAudience  `json:"audience"`
+	Audience     *PushAudience     `json:"audience,omitempty"`
 	Notification *PushNotification `json:"notification,omitempty"`
 	Message      *PushMessage      `json:"message,omitempty"`
 	SmsMessage   *SmsMessage       `json:"sms_message,omitempty"`
 	Options      *PushOptions      `json:"options,omitempty"`
-}
-
-func (push *PushRequest) ExecuteWithClient(client *Client) (map[string]interface{}, error) {
-	link := client.baseUrl + "/v3/push"
-	buf, err := json.Marshal(push)
-	if err != nil {
-		return nil, err
-	}
-	req, err := http.NewRequest("POST", link, bytes.NewReader(buf))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Authorization", client.getAuthorization())
-	req.Header.Set("User-Agent", client.getUserAgent())
-	c := &http.Client{}
-	resp, err := c.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	buf, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-	result := make(map[string]interface{})
-	err = json.Unmarshal(buf, &result)
-	return result, err
 }
