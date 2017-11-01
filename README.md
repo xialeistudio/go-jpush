@@ -4,3 +4,4 @@
 
 ## 功能列表
 + Push API v3
++ Report API v3
