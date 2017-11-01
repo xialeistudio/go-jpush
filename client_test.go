@@ -47,7 +47,7 @@ func TestPushRequestExecuteWithClient(t *testing.T) {
 }
 
 func TestClientGetCidPool(t *testing.T) {
-	data, err := client.GetCidPool(0, "")
+	data, err := client.GetCidPool(0, "push")
 	if err != nil {
 		t.Error(err)
 		return
@@ -66,6 +66,29 @@ func TestClientDoPushGroup(t *testing.T) {
 
 func TestClientValidate(t *testing.T) {
 	result, err := client.Validate(getMsg())
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(result)
+}
+
+func TestClientReportReceived(t *testing.T) {
+	msgId := "1345223734"
+	result, err := client.ReportReceived([]string{msgId})
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(result)
+}
+
+func TestClientReportStatusMessage(t *testing.T) {
+	msgId := 1345223734
+	result, err := client.ReportStatusMessage(&ReportStatusRequest{
+		MsgId:           msgId,
+		RegistrationIds: []string{registrationId},
+	})
 	if err != nil {
 		t.Error(err)
 		return

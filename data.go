@@ -1,5 +1,7 @@
 package jpush
 
+import "encoding/json"
+
 type Platform string
 
 const (
@@ -85,4 +87,30 @@ type PushRequest struct {
 	Message      *PushMessage      `json:"message,omitempty"`
 	SmsMessage   *SmsMessage       `json:"sms_message,omitempty"`
 	Options      *PushOptions      `json:"options,omitempty"`
+}
+
+type ReportStatusRequest struct {
+	MsgId           int      `json:"msg_id,int"`
+	RegistrationIds []string `json:"registration_ids"`
+	Date            string   `json:"date,omitempty"`
+}
+
+type Response struct {
+	data []byte
+}
+
+func (res *Response) Array() ([]interface{}, error) {
+	list := make([]interface{}, 0)
+	err := json.Unmarshal(res.data, &list)
+	return list, err
+}
+
+func (res *Response) Map() (map[string]interface{}, error) {
+	result := make(map[string]interface{})
+	err := json.Unmarshal(res.data, &result)
+	return result, err
+}
+
+func (res *Response) Bytes() ([]byte) {
+	return res.data
 }

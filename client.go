@@ -8,20 +8,23 @@ import (
 	"net/http"
 	"bytes"
 	"io/ioutil"
-	"net/url"
-	"strings"
 	"io"
+	"strconv"
+	"errors"
+	"strings"
 )
 
 type Client struct {
 	AppKey       string
 	MasterSecret string
-	baseUrl      string
+	pushUrl      string
+	reportUrl    string
 }
 
 func NewClient(appKey, masterSecret string) *Client {
 	client := &Client{AppKey: appKey, MasterSecret: masterSecret}
-	client.baseUrl = "https://api.jpush.cn"
+	client.pushUrl = "https://api.jpush.cn"
+	client.reportUrl = "https://report.jpush.cn"
 	return client
 }
 
@@ -38,7 +41,7 @@ func (c *Client) getUserAgent() string {
 	return fmt.Sprintf("(%s) go/%s", runtime.GOOS, runtime.Version())
 }
 
-func (c *Client) request(method, link string, body io.Reader, isGroup bool) (map[string]interface{}, error) {
+func (c *Client) request(method, link string, body io.Reader, isGroup bool) (*Response, error) {
 	req, err := http.NewRequest(method, link, body)
 	if err != nil {
 		return nil, err
@@ -56,46 +59,84 @@ func (c *Client) request(method, link string, body io.Reader, isGroup bool) (map
 	if err != nil {
 		return nil, err
 	}
-	result := make(map[string]interface{})
-	err = json.Unmarshal(buf, &result)
-	return result, err
+	return &Response{data: buf}, nil
 }
 func (c *Client) Push(push *PushRequest) (map[string]interface{}, error) {
-	link := c.baseUrl + "/v3/push"
+	link := c.pushUrl + "/v3/push"
 	buf, err := json.Marshal(push)
 	if err != nil {
 		return nil, err
 	}
-	return c.request("POST", link, bytes.NewReader(buf), false)
+	resp, err := c.request("POST", link, bytes.NewReader(buf), false)
+	if err != nil {
+		return nil, err
+	}
+	return resp.Map()
 }
 
 func (c *Client) GetCidPool(count int, cidType string) (map[string]interface{}, error) {
-	params := url.Values{}
+	link := c.pushUrl + "/v3/push/cid?"
 	if count > 0 {
-		params["count"] = []string{"0"}
+		link += "count=" + strconv.Itoa(count)
 	}
 	if cidType != "" {
-		params["type"] = []string{cidType}
+		link += "type=" + cidType
 	}
-	link := c.baseUrl + "/v3/push/cid"
-
-	return c.request("GET", link, strings.NewReader(params.Encode()), false)
+	resp, err := c.request("GET", link, nil, false)
+	if err != nil {
+		return nil, err
+	}
+	return resp.Map()
 }
 
 func (c *Client) GroupPush(push *PushRequest) (map[string]interface{}, error) {
-	link := c.baseUrl + "/v3/grouppush"
+	link := c.pushUrl + "/v3/grouppush"
 	buf, err := json.Marshal(push)
 	if err != nil {
 		return nil, err
 	}
-	return c.request("POST", link, bytes.NewReader(buf), true)
+	resp, err := c.request("POST", link, bytes.NewReader(buf), true)
+	if err != nil {
+		return nil, err
+	}
+	return resp.Map()
 }
 
 func (c *Client) Validate(req *PushRequest) (map[string]interface{}, error) {
-	link := c.baseUrl + "/v3/push/validate"
+	link := c.pushUrl + "/v3/push/validate"
 	buf, err := json.Marshal(req)
 	if err != nil {
 		return nil, err
 	}
-	return c.request("POST", link, bytes.NewReader(buf), false)
+	resp, err := c.request("POST", link, bytes.NewReader(buf), false)
+	if err != nil {
+		return nil, err
+	}
+	return resp.Map()
 }
+
+func (c *Client) ReportReceived(msgIds []string) ([]interface{}, error) {
+	if len(msgIds) == 0 {
+		return nil, errors.New("msgIds不能为空")
+	}
+	link := c.reportUrl + "/v3/received?msg_ids=" + strings.Join(msgIds, ",")
+	resp, err := c.request("GET", link, nil, false)
+	if err != nil {
+		return nil, err
+	}
+	return resp.Array()
+}
+
+func (c *Client) ReportStatusMessage(req *ReportStatusRequest) (map[string]interface{}, error) {
+	link := c.reportUrl + "/v3/status/message"
+	buf, err := json.Marshal(req)
+	if err != nil {
+		return nil, err
+	}
+	resp, err := c.request("POST", link, bytes.NewReader(buf), false)
+	if err != nil {
+		return nil, err
+	}
+	return resp.Map()
+}
+
