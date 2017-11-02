@@ -95,3 +95,99 @@ func TestClientReportStatusMessage(t *testing.T) {
 	}
 	t.Log(result)
 }
+
+func TestClientDeviceView(t *testing.T) {
+	result, err := client.DeviceView(registrationId)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(result)
+}
+
+func TestClientDeviceRequest(t *testing.T) {
+	tags := &DeviceSettingRequestTags{
+		Add: []string{"test"},
+	}
+	req := &DeviceSettingRequest{
+		Alias:  "xialei",
+		Mobile: "13333333333",
+		Tags:   tags,
+	}
+	result, err := client.DeviceRequest(registrationId, req)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(string(result))
+}
+
+func TestClientDeviceEmptyTagsRequest(t *testing.T) {
+	req := &DeviceSettingEmptyTagsRequest{
+		Alias:  "xialei",
+		Mobile: "13333333333",
+		Tags:   "",
+	}
+	result, err := client.DeviceEmptyTagsRequest(registrationId, req)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(string(result))
+}
+
+func TestClientDeviceGetWithAlias(t *testing.T) {
+	result, err := client.DeviceGetWithAlias("xialei", nil)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(result)
+}
+
+func TestClientDeviceDeleteAlias(t *testing.T) {
+	result, err := client.DeviceDeleteAlias("xialei1")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(result)
+}
+
+func TestClientDeviceGetTags(t *testing.T) {
+	result, err := client.DeviceGetTags()
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(result)
+}
+
+func TestClientDeviceCheckDeviceWithTag(t *testing.T) {
+	result, err := client.DeviceCheckDeviceWithTag("xialei", registrationId)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(result)
+}
+func TestClientDeviceBindTags(t *testing.T) {
+	req := &DeviceBindTagsRequest{
+		Add: []string{registrationId},
+	}
+	result, err := client.DeviceBindTags("xialei", req)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(result)
+}
+
+func TestClientDeviceDeleteTag(t *testing.T) {
+	result, err := client.DeviceDeleteTag("xialei", nil)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(result)
+}
