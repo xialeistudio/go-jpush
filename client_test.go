@@ -191,3 +191,31 @@ func TestClientDeviceDeleteTag(t *testing.T) {
 	}
 	t.Log(result)
 }
+
+func TestClientCreateScheduleTask(t *testing.T) {
+	req := &ScheduleRequest{
+		Name:    "test",
+		Enabled: true,
+		Trigger: &ScheduleTrigger{
+			Single: &ScheduleTriggerSingle{
+				Timer: "2017-11-03 10:00:00",
+			},
+		},
+		Push: getMsg(),
+	}
+	result, err := client.ScheduleCreateTask(req)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(result)
+	//bd41746c-bf81-11e7-b14b-f8fa30f97302
+}
+func TestClientScheduleGetList(t *testing.T) {
+	result, err := client.ScheduleGetList(1)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(result)
+}
