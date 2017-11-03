@@ -198,7 +198,7 @@ func TestClientCreateScheduleTask(t *testing.T) {
 		Enabled: true,
 		Trigger: &ScheduleTrigger{
 			Single: &ScheduleTriggerSingle{
-				Timer: "2017-11-03 10:00:00",
+				Timer: "2017-11-04 10:00:00",
 			},
 		},
 		Push: getMsg(),
@@ -209,10 +209,46 @@ func TestClientCreateScheduleTask(t *testing.T) {
 		return
 	}
 	t.Log(result)
-	//bd41746c-bf81-11e7-b14b-f8fa30f97302
+	//18785f08-c03b-11e7-be12-f8fa30f97302
 }
 func TestClientScheduleGetList(t *testing.T) {
 	result, err := client.ScheduleGetList(1)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(result)
+}
+
+func TestClientScheduleView(t *testing.T) {
+	result, err := client.ScheduleView("18785f08-c03b-11e7-be12-f8fa30f97302")
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(result)
+}
+func TestClientScheduleUpdate(t *testing.T) {
+	req := &ScheduleRequest{
+		Name:    "test",
+		Enabled: false,
+		Trigger: &ScheduleTrigger{
+			Single: &ScheduleTriggerSingle{
+				Timer: "2017-11-04 10:00:00",
+			},
+		},
+		Push: getMsg(),
+	}
+	result, err := client.ScheduleUpdate("18785f08-c03b-11e7-be12-f8fa30f97302", req)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	t.Log(result)
+}
+
+func TestClientScheduleDelete(t *testing.T) {
+	result, err := client.ScheduleDelete("18785f08-c03b-11e7-be12-f8fa30f97302")
 	if err != nil {
 		t.Error(err)
 		return
