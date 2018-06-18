@@ -74,7 +74,7 @@ type PushOptions struct {
 	SendNo          int    `json:"sendno,int,omitempty"`
 	TimeToLive      int    `json:"time_to_live,int,omitempty"`
 	OverrideMsgId   int64  `json:"override_msg_id,int64,omitempty"`
-	ApnsProduction  bool   `json:"apns_production,omitempty"`
+	ApnsProduction  bool   `json:"apns_production"`
 	ApnsCollapseId  string `json:"apns_collapse_id,omitempty"`
 	BigPushDuration int    `json:"big_push_duration,int,omitempty"`
 }
@@ -105,6 +105,6 @@ func (res *Response) Map() (map[string]interface{}, error) {
 	return result, err
 }
 
-func (res *Response) Bytes() ([]byte) {
+func (res *Response) Bytes() []byte {
 	return res.data
 }
